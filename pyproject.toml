@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tggpt"
+authors = [
+    {name = "Igor Kozyrenko", email = "igor@ikseek.com"},
+]
+description = "Chat GPT based telegram multi-user chatbot"
+requires-python = ">=3.11"
+dependencies = [
+    "openai",
+    'aiogram',
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "tggpt.__version__"}
