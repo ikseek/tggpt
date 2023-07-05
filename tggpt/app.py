@@ -6,6 +6,7 @@ from .last_messages import LastMessages
 from .prompt import prompt
 from openai import ChatCompletion
 from datetime import datetime, timezone
+from asyncio import to_thread, gather
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -32,15 +33,22 @@ async def message_received(message: types.Message):
     bot = await message.bot.me
 
     if "@" + bot.username in mentions:
-        p = prompt(datetime.now(timezone.utc), bot.username, last_messages.get_all())
-        completion = ChatCompletion.create(model="gpt-3.5-turbo", temperature=0, messages=p)
-        response = completion.choices[0].message.content.strip().removeprefix(bot.username + ": ")
-
-        result = await message.answer(response)
-        last_messages.add(result.message_id, f'{result.from_user.username}: {result.text}')
+        await respond(bot, message, last_messages)
 
 
 @dp.message_handler(lambda msg: msg.chat.id in all_messages)
 async def message_edited(message: types.Message):
     all_messages[message.chat.id].edit(message.message_id,
                                        f'{message.from_user.username}: {message.text}')
+
+
+async def respond(bot: types.User, message: types.Message, last_messages):
+    p = prompt(datetime.now(timezone.utc), bot.username, last_messages.get_all())
+    placeholder = message.answer("🤖💭", reply=True)
+    completion = to_thread(ChatCompletion.create, model="gpt-3.5-turbo", temperature=0, messages=p)
+    placeholder, completion = await gather(placeholder, completion)
+
+    response = completion.choices[0].message.content.strip().removeprefix(bot.username + ": ")
+
+    result = await placeholder.edit_text(response)
+    last_messages.add(result.message_id, f'{result.from_user.username}: {result.text}')
