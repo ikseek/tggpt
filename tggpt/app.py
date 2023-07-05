@@ -14,6 +14,7 @@ bot = Bot(token=environ['BOT_TOKEN'])
 dp = Dispatcher(bot)
 
 allowed_chats = [int(chat) for chat in environ.get("ALLOWED_CHATS", "").split(",") if chat]
+logging.info("Allowed chats: %s", allowed_chats)
 all_messages = {chat: LastMessages(500) for chat in allowed_chats}
 
 
