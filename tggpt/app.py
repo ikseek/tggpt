@@ -5,6 +5,7 @@ from os import environ
 from .last_messages import LastMessages
 from .prompt import prompt
 from openai import ChatCompletion
+from datetime import datetime, timezone
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -31,7 +32,7 @@ async def message_received(message: types.Message):
     bot = await message.bot.me
 
     if "@" + bot.username in mentions:
-        p = prompt(bot.username, last_messages.get_all())
+        p = prompt(datetime.now(timezone.utc), bot.username, last_messages.get_all())
         completion = ChatCompletion.create(model="gpt-3.5-turbo", temperature=0, messages=p)
         response = completion.choices[0].message.content.strip().removeprefix(bot.username + ": ")
 
