@@ -33,7 +33,7 @@ async def message_received(message: types.Message):
     if "@" + bot.username in mentions:
         p = prompt(bot.username, last_messages.get_all())
         completion = ChatCompletion.create(model="gpt-3.5-turbo", temperature=0, messages=p)
-        response = completion.choices[0].message.content.strip()
+        response = completion.choices[0].message.content.strip().removeprefix(bot.username + ": ")
 
         result = await message.answer(response)
         last_messages.add(result.message_id, f'{result.from_user.username}: {result.text}')
