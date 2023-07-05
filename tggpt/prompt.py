@@ -8,7 +8,7 @@ def prompt(bot_name, messages):
         "Your task is to provide a helpful answer to the next user relating to you.")
     prompt = [{"role": "system", "content": system_prompt}]
     for m in messages:
-        if m.startswith("toB2222Bot"):
+        if m.startswith(bot_name):
             prompt.append({"role": "assistant", "content": m})
         else:
             prompt.append({"role": "user", "content": m})

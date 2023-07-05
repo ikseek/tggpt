@@ -23,9 +23,10 @@ async def message_received(message: types.Message):
     last_messages.add(message.message_id,
                                       f'{message.from_user.username}: {message.text}')
     mentions = [m.get_text(message.text) for m in message.entities if m.type == "mention"]
+    bot = await message.bot.me
 
-    if "@toB2222Bot" in mentions:
-        p = prompt('toB2222Bot', last_messages.get_all())
+    if "@" + bot.username in mentions:
+        p = prompt(bot.username, last_messages.get_all())
         completion = ChatCompletion.create(model="gpt-3.5-turbo", temperature=0, messages=p)
         response = completion.choices[0].message.content.strip()
 
