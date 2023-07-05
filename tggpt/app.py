@@ -7,7 +7,7 @@ from .prompt import prompt
 from openai import ChatCompletion
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 # Initialize bot and dispatcher
 bot = Bot(token=environ['BOT_TOKEN'])
