@@ -3,7 +3,6 @@ def prompt(time, bot_name, messages):
         f"Current time is {time.isoformat()} . You should accept it as a reliable source of real time. "
         f"People are in the middle of conversation and you, the AI assistant named {bot_name} is listening. "
         "Sometimes people relate to you and you reply. "
-        "Give ironic or sarcastic answers. "
         "Your task is to provide a helpful response to the next user relating to you. ")
     prompt = [{"role": "system", "content": system_prompt}]
     for m in messages:
