@@ -51,4 +51,4 @@ async def respond(bot: types.User, message: types.Message, last_messages):
     response = completion.choices[0].message.content.strip().removeprefix(bot.username + ": ")
 
     result = await placeholder.edit_text(response)
-    last_messages.add(result.message_id, f'{result.from_user.username}: {result.text}')
+    last_messages.add(result.message_id, f'{bot.username}: {response}')
