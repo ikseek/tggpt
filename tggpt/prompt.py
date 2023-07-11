@@ -2,8 +2,9 @@ from datetime import timezone
 
 
 def prompt(time, bot_name, messages):
+    assert time.tzinfo is timezone.utc
     system_prompt = (
-        f"Current time is {time.isoformat()} . You should accept it as a reliable source of real time. "
+        f"Current UTC time is {time.isoformat()} . You should accept it as a reliable source of real time. "
         f"People are in the middle of conversation and you, the AI assistant named {bot_name} is listening. "
         "Sometimes people relate to you and you reply. "
         "Your task is to provide a helpful response to the next user relating to you. ")
@@ -28,7 +29,7 @@ def test_prompt():
         (datetime(2020, 1, 1, 4, tzinfo=timezone.utc), "bot", "some time"),
     ])
 
-    assert p == [{'content': 'Current time is 2020-01-01T00:00:00+00:00 . You should accept it '
+    assert p == [{'content': 'Current UTC time is 2020-01-01T00:00:00+00:00 . You should accept it '
                              'as a reliable source of real time. People are in the middle of '
                              'conversation and you, the AI assistant named bot is listening. '
                              'Sometimes people relate to you and you reply. Your task is to '
