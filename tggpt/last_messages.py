@@ -3,17 +3,18 @@ class LastMessages:
         self._max_length = max_length
         self.messages = {}
 
-    def add(self, id, text):
-        self.messages[id] = text
+    def add(self, id, date, name, text):
+        self.messages[id] = date, name, text
         self._maybe_drop_oldest()
 
     def edit(self, id, new_text):
-        self.messages[id] = new_text
+        date, name, _ = self.messages[id]
+        self.messages[id] = date, name, new_text
         self._maybe_drop_oldest()
 
     @property
     def total_length(self):
-        return sum(len(m) for m in self.messages.values())
+        return sum(len(m[2]) for m in self.messages.values())
 
     def _maybe_drop_oldest(self):
         while self.total_length > self._max_length:
@@ -25,38 +26,38 @@ class LastMessages:
 
 def test_last_messages_add_two():
     db = LastMessages(100)
-    db.add(1, "a")
-    db.add(2, "b")
+    db.add(1, "t1", "n1", "a")
+    db.add(2, "t2", "n2", "b")
 
-    assert db.get_all() == ["a", "b"]
+    assert db.get_all() == [('t1', 'n1', 'a'), ('t2', 'n2', 'b')]
 
 
 def test_last_messages_add_three_removes_first():
     db = LastMessages(2)
-    db.add(1, "a")
-    db.add(2, "b")
-    db.add(3, "c")
+    db.add(1, "t1", "n1", "a")
+    db.add(2, "t2", "n2", "b")
+    db.add(3, "t3", "n1", "c")
 
-    assert db.get_all() == ["b", "c"]
+    assert db.get_all() == [('t2', 'n2', 'b'), ('t3', 'n1', 'c')]
 
 
 def test_last_messages_edit():
     db = LastMessages(3)
-    db.add(1, "a")
-    db.add(2, "b")
-    db.add(3, "c")
+    db.add(1, "t1", "n1", "a")
+    db.add(2, "t2", "n2", "b")
+    db.add(3, "t3", "n1", "c")
 
     db.edit(2, "e")
 
-    assert db.get_all() == ["a", "e", "c"]
+    assert db.get_all() == [('t1', 'n1', 'a'), ('t2', 'n2', 'e'), ('t3', 'n1', 'c')]
 
 
 def test_long_edit_removes_first():
     db = LastMessages(3)
-    db.add(1, "a")
-    db.add(2, "b")
-    db.add(3, "c")
+    db.add(1, "t1", "n1", "a")
+    db.add(2, "t2", "n2", "b")
+    db.add(3, "t3", "n1", "c")
 
     db.edit(2, "ee")
 
-    assert db.get_all() == ["ee", "c"]
+    assert db.get_all() == [('t2', 'n2', 'ee'), ('t3', 'n1', 'c')]
