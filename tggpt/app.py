@@ -7,7 +7,7 @@ from .prompt import prompt
 from openai import ChatCompletion
 from datetime import datetime, timezone
 from asyncio import to_thread, gather
-from re import match, escape
+from re import match, escape, MULTILINE
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -49,8 +49,8 @@ async def respond(bot: types.User, message: types.Message, last_messages):
     placeholder, completion = await gather(placeholder, completion)
 
     response = completion.choices[0].message.content.strip()
-    regex = r'\d+:\d+:\d+ {name}: (.*)'.format(name=escape(bot.username))
-    bot_replied_with_header = match(regex, response)
+    regex = r'### \d+:\d+:\d+ {name}: (.*)'.format(name=escape(bot.username))
+    bot_replied_with_header = match(regex, response, MULTILINE)
     if bot_replied_with_header:
         response = bot_replied_with_header.group(1)
 

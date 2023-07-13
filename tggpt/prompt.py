@@ -11,7 +11,7 @@ def prompt(time, bot_name, messages):
     prompt = [{"role": "system", "content": system_prompt}]
     for date, name, text in messages:
         assert date.tzinfo is timezone.utc
-        message = f'{date.time().replace(microsecond=0)} {name}: {text}'
+        message = f'### {date.time().replace(microsecond=0)} {name}: {text}'
         if name == bot_name:
             prompt.append({"role": "assistant", "content": message})
         else:
