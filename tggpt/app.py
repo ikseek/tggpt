@@ -8,6 +8,7 @@ from openai import ChatCompletion
 from datetime import datetime, timezone
 from asyncio import to_thread, gather
 from re import match, escape, MULTILINE, DOTALL
+from textwrap import indent
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -28,7 +29,10 @@ async def message_received(message: types.Message):
                         message.chat.id, message.from_user.username)
         return
     last_messages = all_messages[message.chat.id]
-    last_messages.add(message.message_id, datetime.now(timezone.utc), message.from_user.username, message.text)
+    message_text = message.text
+    if message.reply_to_message:
+        message_text = indent(message.reply_to_message.text, ">>") + "\n" + message_text
+    last_messages.add(message.message_id, datetime.now(timezone.utc), message.from_user.username, message_text)
     mentions = [m.get_text(message.text) for m in message.entities if m.type == "mention"]
     bot = await message.bot.me
 
