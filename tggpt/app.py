@@ -19,7 +19,7 @@ dp = Dispatcher(bot)
 
 allowed_chats = [int(chat) for chat in environ.get("ALLOWED_CHATS", "").split(",") if chat]
 logging.info("Allowed chats: %s", allowed_chats)
-all_messages = {chat: LastMessages(1000) for chat in allowed_chats}
+all_messages = {chat: LastMessages(2000) for chat in allowed_chats}
 
 
 @dp.message_handler()
