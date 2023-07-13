@@ -32,7 +32,9 @@ async def message_received(message: types.Message):
     mentions = [m.get_text(message.text) for m in message.entities if m.type == "mention"]
     bot = await message.bot.me
 
-    if "@" + bot.username in mentions:
+    is_reply = message.reply_to_message and message.reply_to_message["from"].username == bot.username
+
+    if "@" + bot.username in mentions or is_reply:
         await respond(bot, message, last_messages)
 
 
@@ -50,7 +52,7 @@ async def respond(bot: types.User, message: types.Message, last_messages):
 
     response = completion.choices[0].message.content.strip()
     regex = r'### \d+:\d+:\d+ {name}: (.*)'.format(name=escape(bot.username))
-    bot_replied_with_header = match(regex, response, MULTILINE|DOTALL)
+    bot_replied_with_header = match(regex, response, MULTILINE | DOTALL)
     if bot_replied_with_header:
         response = bot_replied_with_header.group(1)
 
