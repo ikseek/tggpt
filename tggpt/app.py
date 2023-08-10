@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from asyncio import to_thread, gather, sleep
 from re import match, escape, MULTILINE, DOTALL
 from textwrap import indent
-from .horde import generate_image
+from .horde import generate_image, list_models
 from io import BytesIO
 from pathlib import Path
 from asyncio import to_thread
@@ -29,6 +29,10 @@ allowed_chats = [int(chat) for chat in environ.get("ALLOWED_CHATS", "").split(",
 logging.info("Allowed chats: %s", allowed_chats)
 all_messages = {chat: LastMessages(2000) for chat in allowed_chats}
 
+@dp.message_handler(commands=types.BotCommand(command="models", description="List all models"))
+async def models(message: types.Message):
+    res = await list_models()
+    await message.reply(", ".join(res))
 
 @dp.message_handler(commands=types.BotCommand(command="draw", description="Draw an image"))
 async def draw(message: types.Message):
