@@ -2,6 +2,9 @@ import logging
 
 from aiogram import Bot, Dispatcher, types
 from os import environ
+
+from aiogram.utils.exceptions import RetryAfter
+
 from .last_messages import LastMessages
 from .prompt import prompt
 from openai import ChatCompletion
@@ -52,8 +55,11 @@ async def draw(message: types.Message):
         else:
             progress = f"Waiting in line, ETA {val}"
             if placeholder_text != progress:
-                await placeholder.edit_caption(caption=progress)
-                placeholder_text = progress
+                try:
+                    await placeholder.edit_caption(caption=progress)
+                    placeholder_text = progress
+                except RetryAfter as e:
+                    await sleep(e.timeout)
 
 
 @dp.message_handler()
