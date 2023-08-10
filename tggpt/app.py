@@ -12,6 +12,8 @@ from textwrap import indent
 from .horde import generate_image
 from io import BytesIO
 from pathlib import Path
+from asyncio import to_thread
+from openai import ChatCompletion
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -27,13 +29,23 @@ all_messages = {chat: LastMessages(2000) for chat in allowed_chats}
 
 @dp.message_handler(commands=types.BotCommand(command="draw", description="Draw an image"))
 async def draw(message: types.Message):
-    if not message.get_args():
+    prompt = message.get_args()
+    if not prompt:
         await message.reply("Please provide image description")
         return
-    placeholder_text = "Sending request"
+    try:
+        prompt.encode('ascii')
+    except Exception:
+
+        request = [{"role": "system", "content": "Translate every message user sends to English"},
+                   {"role": "user", "content": prompt}]
+        completion = await to_thread(ChatCompletion.create, model="gpt-3.5-turbo", temperature=0, messages=request)
+        prompt = completion.choices[0].message.content.strip()
+
+    placeholder_text = f"Sending request: {prompt}"
     with Path(__file__).parent.joinpath("line.png").open('rb') as ph_file:
         placeholder = await message.reply_photo(ph_file, placeholder_text)
-    async for status, val in generate_image(message.get_args()):
+    async for status, val in generate_image(prompt):
         if status == "done":
             await sleep(1)
             await placeholder.edit_media(types.InputMediaPhoto(media=BytesIO(val), caption="Here is your image"))
