@@ -6,7 +6,7 @@ from .last_messages import LastMessages
 from .prompt import prompt
 from openai import ChatCompletion
 from datetime import datetime, timezone
-from asyncio import to_thread, gather
+from asyncio import to_thread, gather, sleep
 from re import match, escape, MULTILINE, DOTALL
 from textwrap import indent
 from .horde import generate_image
@@ -35,6 +35,7 @@ async def draw(message: types.Message):
         placeholder = await message.reply_photo(ph_file, placeholder_text)
     async for status, val in generate_image(message.get_args()):
         if status == "done":
+            await sleep(1)
             await placeholder.edit_media(types.InputMediaPhoto(media=BytesIO(val), caption="Here is your image"))
         else:
             progress = f"Waiting in line, ETA {val}"
