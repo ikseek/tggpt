@@ -52,18 +52,21 @@ async def draw(message: types.Message):
     placeholder_text = f"Sending request: {prompt}"
     with Path(__file__).parent.joinpath("line.png").open('rb') as ph_file:
         placeholder = await message.reply_photo(ph_file, placeholder_text)
-    async for status, val in generate_image(prompt):
-        if status == "done":
-            await sleep(1)
-            await placeholder.edit_media(types.InputMediaPhoto(media=BytesIO(val), caption="Here is your image"))
-        else:
-            progress = f"Waiting in line, ETA {val}"
-            if placeholder_text != progress:
-                try:
-                    await placeholder.edit_caption(caption=progress)
-                    placeholder_text = progress
-                except RetryAfter as e:
-                    await sleep(e.timeout)
+    try:
+        async for status, val in generate_image(prompt):
+            if status == "done":
+                await sleep(1)
+                await placeholder.edit_media(types.InputMediaPhoto(media=BytesIO(val), caption="Here is your image"))
+            else:
+                progress = f"Waiting in line, ETA {val}"
+                if placeholder_text != progress:
+                    try:
+                        await placeholder.edit_caption(caption=progress)
+                        placeholder_text = progress
+                    except RetryAfter as e:
+                        await sleep(e.timeout)
+    except Exception as e:
+        await placeholder.edit_caption(f"Error: {e}")
 
 
 @dp.message_handler()
