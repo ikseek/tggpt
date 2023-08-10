@@ -14,7 +14,7 @@ async def generate_image(prompt: str):
     status = await client.generate_check(request_id)
     while not status.done:
         yield "generating", timedelta(seconds=status.wait_time)
-        await asyncio.sleep(max(1, status.wait_time / 100))
+        await asyncio.sleep(max(2, status.wait_time / 100))
         status = await client.generate_check(request_id)
 
     generate_status = await client.generate_status(request_id)
