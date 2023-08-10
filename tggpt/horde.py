@@ -8,7 +8,7 @@ client = StableHordeAPI(environ["STABLEHORDE_API_KEY"])
 
 
 async def generate_image(prompt: str):
-    params = GenerationInput(prompt, nsfw=True, censor_nsfw=False, r2=False)
+    params = GenerationInput(prompt, models=["Anything Diffusion"], nsfw=True, censor_nsfw=False, r2=False)
     request_id = (await client.txt2img_request(params)).id
 
     status = await client.generate_check(request_id)
