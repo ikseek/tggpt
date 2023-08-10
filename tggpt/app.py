@@ -27,6 +27,9 @@ all_messages = {chat: LastMessages(2000) for chat in allowed_chats}
 
 @dp.message_handler(commands=types.BotCommand(command="draw", description="Draw an image"))
 async def draw(message: types.Message):
+    if not message.get_args():
+        await message.reply("Please provide image description")
+        return
     placeholder_text = "Sending request"
     with Path(__file__).parent.joinpath("line.png").open('rb') as ph_file:
         placeholder = await message.reply_photo(ph_file, placeholder_text)
@@ -38,10 +41,6 @@ async def draw(message: types.Message):
             if placeholder_text != progress:
                 await placeholder.edit_caption(caption=progress)
                 placeholder_text = progress
-
-@dp.message_handler(lambda msg: msg.chat.id in all_messages)
-async def message_edited(message: types.Message):
-    all_messages[message.chat.id].edit(message.message_id, message.text)
 
 
 @dp.message_handler()
@@ -63,6 +62,10 @@ async def message_received(message: types.Message):
     if "@" + bot.username in mentions or is_reply:
         await respond(bot, message, last_messages)
 
+
+@dp.message_handler(lambda msg: msg.chat.id in all_messages)
+async def message_edited(message: types.Message):
+    all_messages[message.chat.id].edit(message.message_id, message.text)
 
 
 async def respond(bot: types.User, message: types.Message, last_messages):
