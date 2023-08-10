@@ -9,6 +9,9 @@ from datetime import datetime, timezone
 from asyncio import to_thread, gather
 from re import match, escape, MULTILINE, DOTALL
 from textwrap import indent
+from .horde import generate_image
+from io import BytesIO
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,6 +23,25 @@ dp = Dispatcher(bot)
 allowed_chats = [int(chat) for chat in environ.get("ALLOWED_CHATS", "").split(",") if chat]
 logging.info("Allowed chats: %s", allowed_chats)
 all_messages = {chat: LastMessages(2000) for chat in allowed_chats}
+
+
+@dp.message_handler(commands=types.BotCommand(command="draw", description="Draw an image"))
+async def draw(message: types.Message):
+    placeholder_text = "Sending request"
+    with Path(__file__).parent.joinpath("line.png").open('rb') as ph_file:
+        placeholder = await message.reply_photo(ph_file, placeholder_text)
+    async for status, val in generate_image(message.get_args()):
+        if status == "done":
+            await placeholder.edit_media(types.InputMediaPhoto(media=BytesIO(val), caption="Here is your image"))
+        else:
+            progress = f"Waiting in line, ETA {val}"
+            if placeholder_text != progress:
+                await placeholder.edit_caption(caption=progress)
+                placeholder_text = progress
+
+@dp.message_handler(lambda msg: msg.chat.id in all_messages)
+async def message_edited(message: types.Message):
+    all_messages[message.chat.id].edit(message.message_id, message.text)
 
 
 @dp.message_handler()
@@ -41,10 +63,6 @@ async def message_received(message: types.Message):
     if "@" + bot.username in mentions or is_reply:
         await respond(bot, message, last_messages)
 
-
-@dp.message_handler(lambda msg: msg.chat.id in all_messages)
-async def message_edited(message: types.Message):
-    all_messages[message.chat.id].edit(message.message_id, message.text)
 
 
 async def respond(bot: types.User, message: types.Message, last_messages):
